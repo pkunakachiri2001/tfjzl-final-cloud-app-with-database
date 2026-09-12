@@ -36,20 +36,41 @@
 </nav>
 
 <div class="container-fluid">
-    {% if grade > 80 %}
+    {% if percentage >= 80 %}
     <div class="alert alert-success">
-       <!--HINT Display passed info -->
+       Congratulations {{ user.username }}! You have passed the exam and completed the course with score {{ score }}/{{ total_score }} ({{ percentage|floatformat:2 }}%)
     </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
-        </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
-        </div>
+    {% else %}
+    <div class="alert alert-danger">
+        Sorry {{ user.username }}, you have failed the exam. Your score was {{ score }}/{{ total_score }} ({{ percentage|floatformat:2 }}%). You need at least 80% to pass.
     </div>
+    <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
+    {% endif %}
+    <div class="card-columns-vertical mt-1">
+    <h5 class="">Exam results</h5>
+        {% for question in course.question_set.all %}
+            <div class="card mt-1">
+                <div class="card-header"><h5>{{ question.content }}</h5></div>
+                <div class="card-body">
+                    {% for choice in question.choice_set.all %}
+                        <div class="form-check">
+                            {% if choice.is_correct %}
+                                <span class="text-success font-weight-bold">&#10003;</span>
+                            {% else %}
+                                <span class="text-danger font-weight-bold">&#10007;</span>
+                            {% endif %}
+                            <label class="form-check-label">
+                                {{ choice.content }}
+                            </label>
+                            {% if choice in submission.choices.all %}
+                                <span class="badge badge-info ml-2">Selected</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 </body>
 </html>
